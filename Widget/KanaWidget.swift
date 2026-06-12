@@ -67,10 +67,14 @@ struct KanaWidgetView: View {
         .containerBackground(.clear, for: .widget)
     }
 
+    // 엑스라지 페이스에서는 시스템이 원형 컴플리케이션을 화면 크기로 확대하므로
+    // 주어진 영역을 꽉 채우도록 큰 폰트에서 축소하는 방식을 쓴다.
     private var circularView: some View {
         Text(entry.kana.character)
-            .font(.system(size: 30, weight: .bold))
-            .minimumScaleFactor(0.5)
+            .font(.system(size: 180, weight: .heavy))
+            .minimumScaleFactor(0.1)
+            .lineLimit(1)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var cornerView: some View {
