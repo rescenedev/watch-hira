@@ -8,12 +8,15 @@ struct MenuView: View {
             NavigationLink(value: KanaScript.hiragana) {
                 ScriptRow(title: "히라가나", sample: "あいう")
             }
-            .slateRow()
+            .slateRowOnIOS()
+            .noSeparatorOnIOS()
             NavigationLink(value: KanaScript.katakana) {
                 ScriptRow(title: "가타카나", sample: "アイウ")
             }
-            .slateRow()
+            .slateRowOnIOS()
+            .noSeparatorOnIOS()
         }
+        .spacedListOnIOS()
         .slateScreenOnIOS()
         .navigationTitle("가나 학습")
         .navigationDestination(for: KanaScript.self) { script in

@@ -24,6 +24,7 @@ struct ScriptHomeView: View {
                 Label("공부하기", systemImage: "shuffle")
             }
             .slateRow()
+            .noSeparatorOnIOS()
 
             NavigationLink {
                 BrowseView(title: title, kanaList: pool)
@@ -31,6 +32,7 @@ struct ScriptHomeView: View {
                 Label("순서대로 보기", systemImage: "list.bullet")
             }
             .slateRow()
+            .noSeparatorOnIOS()
 
             NavigationLink {
                 QuizView(script: script, pool: pool)
@@ -38,13 +40,17 @@ struct ScriptHomeView: View {
                 Label("퀴즈", systemImage: "questionmark.circle")
             }
             .slateRow()
+            .noSeparatorOnIOS()
 
             Toggle("탁음·반탁음 포함", isOn: $includeVoiced)
                 .slateRow()
+            .noSeparatorOnIOS()
 
             BestScoreRow(key: bestScoreKey)
                 .slateRow()
+            .noSeparatorOnIOS()
         }
+        .spacedListOnIOS()
         .slateScreen()
         .navigationTitle(title)
     }

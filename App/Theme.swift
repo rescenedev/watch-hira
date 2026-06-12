@@ -56,4 +56,34 @@ extension View {
         self
         #endif
     }
+
+    /// iOS에서만 slate 행 배경을 깐다 (watchOS는 시스템 기본 유지).
+    @ViewBuilder
+    func slateRowOnIOS() -> some View {
+        #if os(iOS)
+        slateRow()
+        #else
+        self
+        #endif
+    }
+
+    /// iOS에서 리스트 행 사이 간격을 벌리고 구분선을 숨긴다.
+    @ViewBuilder
+    func spacedListOnIOS() -> some View {
+        #if os(iOS)
+        listRowSpacing(14)
+        #else
+        self
+        #endif
+    }
+
+    /// iOS에서 행 구분선을 숨긴다.
+    @ViewBuilder
+    func noSeparatorOnIOS() -> some View {
+        #if os(iOS)
+        listRowSeparator(.hidden)
+        #else
+        self
+        #endif
+    }
 }
