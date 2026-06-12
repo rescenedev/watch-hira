@@ -8,10 +8,13 @@ struct MenuView: View {
             NavigationLink(value: KanaScript.hiragana) {
                 ScriptRow(title: "히라가나", sample: "あいう")
             }
+            .slateRow()
             NavigationLink(value: KanaScript.katakana) {
                 ScriptRow(title: "가타카나", sample: "アイウ")
             }
+            .slateRow()
         }
+        .slateScreenOnIOS()
         .navigationTitle("가나 학습")
         .navigationDestination(for: KanaScript.self) { script in
             ScriptHomeView(script: script)
@@ -29,7 +32,7 @@ private struct ScriptRow: View {
                 .font(.headline)
             Text(sample)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.slate400)
         }
         .padding(.vertical, 4)
     }

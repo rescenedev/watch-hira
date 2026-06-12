@@ -9,7 +9,9 @@ struct BrowseView: View {
     var body: some View {
         List(kanaList) { kana in
             BrowseRow(kana: kana)
+                .slateRow()
         }
+        .slateScreen()
         .navigationTitle(title)
     }
 }
@@ -28,12 +30,12 @@ private struct BrowseRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(kana.romaji)
                     .font(.footnote.bold())
-                    .foregroundStyle(.green)
+                    .foregroundStyle(Theme.mint)
 
                 ForEach(exampleWords, id: \.word) { example in
                     Text("\(example.word) \(example.meaning)")
                         .font(.system(size: 12))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.slate400)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                 }

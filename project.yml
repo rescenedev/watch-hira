@@ -3,6 +3,7 @@ options:
   bundleIdPrefix: com.zihado
   deploymentTarget:
     watchOS: "10.0"
+    iOS: "17.0"
 packages:
   KanaCore:
     path: KanaCore
@@ -38,11 +39,58 @@ targets:
         TARGETED_DEVICE_FAMILY: 4
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: 589U6DQJN8
+  KanaStudyiOS:
+    type: application
+    platform: iOS
+    sources:
+      - App
+    dependencies:
+      - package: KanaCore
+      - target: KanaWidgetiOS
+        embed: true
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_CFBundleDisplayName: 가나 학습
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        PRODUCT_BUNDLE_IDENTIFIER: com.zihado.kanastudy.ios
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: "1.0"
+        SWIFT_VERSION: "5.9"
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 589U6DQJN8
+  KanaWidgetiOS:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Widget
+        excludes:
+          - "*.plist"
+    dependencies:
+      - package: KanaCore
+    info:
+      path: Widget/Info-iOS.plist
+      properties:
+        CFBundleDisplayName: 오늘의 가나
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.zihado.kanastudy.ios.widget
+        SWIFT_VERSION: "5.9"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 589U6DQJN8
+        SKIP_INSTALL: YES
   KanaWidget:
     type: app-extension
     platform: watchOS
     sources:
-      - Widget
+      - path: Widget
+        excludes:
+          - "*.plist"
     dependencies:
       - package: KanaCore
     info:

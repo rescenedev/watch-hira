@@ -33,12 +33,21 @@ struct QuizView: View {
                 ProgressView()
             }
         }
+        .slateScreen()
         .navigationTitle(isFinished ? "결과" : "퀴즈")
         .onAppear(perform: startQuiz)
     }
 
     private var currentQuestion: QuizQuestion? {
         questions.indices.contains(currentIndex) ? questions[currentIndex] : nil
+    }
+
+    private var promptSize: CGFloat {
+        #if os(watchOS)
+        48
+        #else
+        110
+        #endif
     }
 
     private func questionView(_ question: QuizQuestion) -> some View {
@@ -49,7 +58,7 @@ struct QuizView: View {
                     .foregroundStyle(.secondary)
 
                 Text(question.prompt.character)
-                    .font(.system(size: 48, weight: .bold))
+                    .font(.system(size: promptSize, weight: .bold))
 
                 ForEach(question.choices, id: \.self) { choice in
                     ChoiceButton(

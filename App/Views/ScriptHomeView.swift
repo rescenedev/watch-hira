@@ -23,23 +23,29 @@ struct ScriptHomeView: View {
             } label: {
                 Label("공부하기", systemImage: "shuffle")
             }
+            .slateRow()
 
             NavigationLink {
                 BrowseView(title: title, kanaList: pool)
             } label: {
                 Label("순서대로 보기", systemImage: "list.bullet")
             }
+            .slateRow()
 
             NavigationLink {
                 QuizView(script: script, pool: pool)
             } label: {
                 Label("퀴즈", systemImage: "questionmark.circle")
             }
+            .slateRow()
 
             Toggle("탁음·반탁음 포함", isOn: $includeVoiced)
+                .slateRow()
 
             BestScoreRow(key: bestScoreKey)
+                .slateRow()
         }
+        .slateScreen()
         .navigationTitle(title)
     }
 
