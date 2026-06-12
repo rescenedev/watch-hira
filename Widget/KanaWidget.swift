@@ -80,13 +80,14 @@ struct KanaWidgetView: View {
     }
 
     private var rectangularView: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 10) {
             Text(entry.kana.character)
-                .font(.system(size: 34, weight: .bold))
+                .font(.system(size: 50, weight: .heavy))
+                .minimumScaleFactor(0.6)
 
             VStack(alignment: .leading, spacing: 1) {
                 Text(entry.kana.romaji)
-                    .font(.footnote.bold())
+                    .font(.system(size: 17, weight: .bold))
                     .foregroundStyle(.green)
 
                 if let example = entry.exampleWord {
@@ -99,6 +100,7 @@ struct KanaWidgetView: View {
             }
             Spacer(minLength: 0)
         }
+        .frame(maxHeight: .infinity)
     }
 
     private var inlineView: some View {
