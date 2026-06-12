@@ -1,0 +1,11 @@
+# Xcode (프로젝트는 `xcodegen generate`로 생성)
+KanaStudy.xcodeproj/
+DerivedData/
+build/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# macOS
+.DS_Store
