@@ -106,7 +106,7 @@ struct MenuView: View {
         }
         .spacedListOnIOS()
         .slateScreenOnIOS()
-        .navigationTitle("가나 학습")
+        .navigationTitle("일본어공부")
         .navigationDestination(for: KanaScript.self) { script in
             ScriptHomeView(script: script)
         }
