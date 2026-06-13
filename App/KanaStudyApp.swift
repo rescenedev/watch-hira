@@ -27,9 +27,13 @@ struct KanaStudyApp: App {
                 kanaList: KanaData.kana(script: script, groups: [.basic])
             )
         case .quiz(let script):
-            QuizView(script: script, pool: KanaData.kana(script: script, groups: [.basic]))
+            QuizView(
+                title: "퀴즈",
+                items: KanaData.kana(script: script, groups: [.basic]).map(\.quizItem),
+                scoreKey: "bestScore.\(script.rawValue)"
+            )
         case .vocab(let kind):
-            VocabStudyView(title: kind.title, words: VocabData.words(for: kind))
+            VocabStudyView(title: kind.title, words: VocabData.words(for: kind), deckKind: kind)
         case nil:
             MenuView()
         }

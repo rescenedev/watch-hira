@@ -1,7 +1,7 @@
 import Foundation
 
 /// 단어집의 단어 하나: 표기, 읽기(후리가나), 한국어 뜻.
-public struct VocabWord: Hashable, Identifiable, Sendable {
+public struct VocabWord: Hashable, Identifiable, Sendable, Codable {
     public let word: String
     public let reading: String
     public let meaning: String
@@ -22,11 +22,15 @@ public struct VocabWord: Hashable, Identifiable, Sendable {
 public enum VocabDeckKind: String, CaseIterable, Codable, Sendable, Hashable {
     case jlptN3
     case travel
+    case jlptN5
+    case jlptN4
 
     public var title: String {
         switch self {
         case .jlptN3: return "JLPT N3"
         case .travel: return "여행"
+        case .jlptN5: return "JLPT N5"
+        case .jlptN4: return "JLPT N4"
         }
     }
 
@@ -34,6 +38,8 @@ public enum VocabDeckKind: String, CaseIterable, Codable, Sendable, Hashable {
         switch self {
         case .jlptN3: return "시험 대비 핵심 단어"
         case .travel: return "여행에서 바로 쓰는 단어"
+        case .jlptN5: return "입문 필수 단어"
+        case .jlptN4: return "초급 핵심 단어"
         }
     }
 }
@@ -44,6 +50,8 @@ public enum VocabData {
         switch kind {
         case .jlptN3: return jlptN3Words
         case .travel: return travelWords
+        case .jlptN5: return jlptN5Words
+        case .jlptN4: return jlptN4Words
         }
     }
 }

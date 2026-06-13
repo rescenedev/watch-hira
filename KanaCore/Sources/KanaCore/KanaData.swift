@@ -25,6 +25,34 @@ public enum KanaData {
 
     private static let handakuonRomaji: [String] = ["pa", "pi", "pu", "pe", "po"]
 
+    private static let yoonRomaji: [String] = [
+        "kya", "kyu", "kyo",
+        "sha", "shu", "sho",
+        "cha", "chu", "cho",
+        "nya", "nyu", "nyo",
+        "hya", "hyu", "hyo",
+        "mya", "myu", "myo",
+        "rya", "ryu", "ryo",
+        "gya", "gyu", "gyo",
+        "ja", "ju", "jo",
+        "bya", "byu", "byo",
+        "pya", "pyu", "pyo",
+    ]
+
+    private static let hiraganaYoon: [String] = [
+        "きゃ", "きゅ", "きょ", "しゃ", "しゅ", "しょ", "ちゃ", "ちゅ", "ちょ",
+        "にゃ", "にゅ", "にょ", "ひゃ", "ひゅ", "ひょ", "みゃ", "みゅ", "みょ",
+        "りゃ", "りゅ", "りょ", "ぎゃ", "ぎゅ", "ぎょ", "じゃ", "じゅ", "じょ",
+        "びゃ", "びゅ", "びょ", "ぴゃ", "ぴゅ", "ぴょ",
+    ]
+
+    private static let katakanaYoon: [String] = [
+        "キャ", "キュ", "キョ", "シャ", "シュ", "ショ", "チャ", "チュ", "チョ",
+        "ニャ", "ニュ", "ニョ", "ヒャ", "ヒュ", "ヒョ", "ミャ", "ミュ", "ミョ",
+        "リャ", "リュ", "リョ", "ギャ", "ギュ", "ギョ", "ジャ", "ジュ", "ジョ",
+        "ビャ", "ビュ", "ビョ", "ピャ", "ピュ", "ピョ",
+    ]
+
     private static let hiraganaBasic = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん"
     private static let hiraganaDakuon = "がぎぐげござじずぜぞだぢづでどばびぶべぼ"
     private static let hiraganaHandakuon = "ぱぴぷぺぽ"
@@ -45,19 +73,21 @@ public enum KanaData {
     }
 
     private static func makeScript(_ script: KanaScript) -> [Kana] {
-        let sources: [(characters: String, romaji: [String], group: KanaGroup)]
+        let sources: [(characters: [String], romaji: [String], group: KanaGroup)]
         switch script {
         case .hiragana:
             sources = [
-                (hiraganaBasic, basicRomaji, .basic),
-                (hiraganaDakuon, dakuonRomaji, .dakuon),
-                (hiraganaHandakuon, handakuonRomaji, .handakuon),
+                (hiraganaBasic.map(String.init), basicRomaji, .basic),
+                (hiraganaDakuon.map(String.init), dakuonRomaji, .dakuon),
+                (hiraganaHandakuon.map(String.init), handakuonRomaji, .handakuon),
+                (hiraganaYoon, yoonRomaji, .yoon),
             ]
         case .katakana:
             sources = [
-                (katakanaBasic, basicRomaji, .basic),
-                (katakanaDakuon, dakuonRomaji, .dakuon),
-                (katakanaHandakuon, handakuonRomaji, .handakuon),
+                (katakanaBasic.map(String.init), basicRomaji, .basic),
+                (katakanaDakuon.map(String.init), dakuonRomaji, .dakuon),
+                (katakanaHandakuon.map(String.init), handakuonRomaji, .handakuon),
+                (katakanaYoon, yoonRomaji, .yoon),
             ]
         }
         return sources.flatMap { source in
@@ -67,7 +97,7 @@ public enum KanaData {
             )
             return zip(source.characters, source.romaji).map { character, romaji in
                 Kana(
-                    character: String(character),
+                    character: character,
                     romaji: romaji,
                     script: script,
                     group: source.group

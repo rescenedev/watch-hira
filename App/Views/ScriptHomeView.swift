@@ -6,11 +6,17 @@ struct ScriptHomeView: View {
     let script: KanaScript
 
     @AppStorage("includeVoiced") private var includeVoiced = false
+    @AppStorage("includeYoon") private var includeYoon = false
+    @AppStorage("autoSpeak") private var autoSpeak = false
 
     private var pool: [Kana] {
-        let groups: Set<KanaGroup> = includeVoiced
-            ? Set(KanaGroup.allCases)
-            : [.basic]
+        var groups: Set<KanaGroup> = [.basic]
+        if includeVoiced {
+            groups.formUnion([.dakuon, .handakuon])
+        }
+        if includeYoon {
+            groups.insert(.yoon)
+        }
         return KanaData.kana(script: script, groups: groups)
     }
 
@@ -35,7 +41,11 @@ struct ScriptHomeView: View {
             .noSeparatorOnIOS()
 
             NavigationLink {
-                QuizView(script: script, pool: pool)
+                QuizView(
+                    title: "퀴즈",
+                    items: pool.map(\.quizItem),
+                    scoreKey: bestScoreKey
+                )
             } label: {
                 Label("퀴즈", systemImage: "questionmark.circle")
             }
@@ -44,7 +54,15 @@ struct ScriptHomeView: View {
 
             Toggle("탁음·반탁음 포함", isOn: $includeVoiced)
                 .slateRow()
-            .noSeparatorOnIOS()
+                .noSeparatorOnIOS()
+
+            Toggle("요음 포함 (きゃ 등)", isOn: $includeYoon)
+                .slateRow()
+                .noSeparatorOnIOS()
+
+            Toggle("자동 발음", isOn: $autoSpeak)
+                .slateRow()
+                .noSeparatorOnIOS()
 
             BestScoreRow(key: bestScoreKey)
                 .slateRow()

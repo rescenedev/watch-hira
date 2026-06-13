@@ -30,10 +30,12 @@ struct StudyView: View {
     private func prepareDeck() {
         guard deck.isEmpty else { return }
         deck = kanaList.shuffled()
+        StudyLogStore.shared.record()
     }
 
     private func advance() {
         guard !deck.isEmpty else { return }
+        StudyLogStore.shared.record()
         withAnimation {
             currentIndex = (currentIndex + 1) % deck.count
         }
@@ -76,6 +78,7 @@ struct KanaCardView: View {
     var onAdvance: () -> Void = {}
     var onRetreat: () -> Void = {}
 
+    @AppStorage("autoSpeak") private var autoSpeak = false
     @State private var exampleWords: [KanaWord] = []
 
     #if os(watchOS)
@@ -98,12 +101,22 @@ struct KanaCardView: View {
                     .foregroundStyle(Theme.mint)
 
                 wordList
+
+                HStack(spacing: 4) {
+                    SpeakerButton(text: kana.character)
+                    StarButton(itemID: kana.quizItem.id)
+                }
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
             .contentShape(Rectangle())
             .cardTapNavigation(width: geometry.size.width, onAdvance: onAdvance, onRetreat: onRetreat)
         }
-        .onAppear(perform: pickWords)
+        .onAppear {
+            pickWords()
+            if autoSpeak {
+                SpeechService.shared.speakJapanese(kana.character)
+            }
+        }
     }
 
     private var romajiFont: Font {

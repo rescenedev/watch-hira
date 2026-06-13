@@ -11,6 +11,14 @@ final class VocabDataTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(VocabData.words(for: .travel).count, 60)
     }
 
+    func testJLPTN5DeckHasEnoughWords() {
+        XCTAssertGreaterThanOrEqual(VocabData.words(for: .jlptN5).count, 80)
+    }
+
+    func testJLPTN4DeckHasEnoughWords() {
+        XCTAssertGreaterThanOrEqual(VocabData.words(for: .jlptN4).count, 70)
+    }
+
     func testWordsAreUniqueWithinEachDeck() {
         for kind in VocabDeckKind.allCases {
             let words = VocabData.words(for: kind).map(\.word)

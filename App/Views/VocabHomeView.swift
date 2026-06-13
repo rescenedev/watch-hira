@@ -5,6 +5,8 @@ import KanaCore
 struct VocabHomeView: View {
     let kind: VocabDeckKind
 
+    @AppStorage("autoSpeak") private var autoSpeak = false
+
     private var words: [VocabWord] {
         VocabData.words(for: kind)
     }
@@ -12,7 +14,7 @@ struct VocabHomeView: View {
     var body: some View {
         List {
             NavigationLink {
-                VocabStudyView(title: kind.title, words: words)
+                VocabStudyView(title: kind.title, words: words, deckKind: kind)
             } label: {
                 Label("공부하기", systemImage: "shuffle")
             }
@@ -26,6 +28,22 @@ struct VocabHomeView: View {
             }
             .slateRow()
             .noSeparatorOnIOS()
+
+            NavigationLink {
+                QuizView(
+                    title: "단어 퀴즈",
+                    items: words.map { $0.quizItem(deck: kind) },
+                    scoreKey: "bestScore.\(kind.rawValue)"
+                )
+            } label: {
+                Label("단어 퀴즈", systemImage: "questionmark.circle")
+            }
+            .slateRow()
+            .noSeparatorOnIOS()
+
+            Toggle("자동 발음", isOn: $autoSpeak)
+                .slateRow()
+                .noSeparatorOnIOS()
 
             HStack {
                 Text("단어 수")

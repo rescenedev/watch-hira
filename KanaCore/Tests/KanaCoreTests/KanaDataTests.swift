@@ -6,11 +6,11 @@ final class KanaDataTests: XCTestCase {
     // MARK: - 개수 검증
 
     func testHiraganaTotalCount() {
-        XCTAssertEqual(KanaData.kana(script: .hiragana).count, 71)
+        XCTAssertEqual(KanaData.kana(script: .hiragana).count, 104)
     }
 
     func testKatakanaTotalCount() {
-        XCTAssertEqual(KanaData.kana(script: .katakana).count, 71)
+        XCTAssertEqual(KanaData.kana(script: .katakana).count, 104)
     }
 
     func testBasicGroupCountPerScript() {
@@ -34,6 +34,12 @@ final class KanaDataTests: XCTestCase {
         }
     }
 
+    func testYoonGroupCountPerScript() {
+        for script in KanaScript.allCases {
+            XCTAssertEqual(KanaData.kana(script: script, groups: [.yoon]).count, 33)
+        }
+    }
+
     // MARK: - 무결성 검증
 
     func testAllCharactersAreUnique() {
@@ -47,9 +53,10 @@ final class KanaDataTests: XCTestCase {
         }
     }
 
-    func testAllEntriesAreSingleCharacter() {
+    func testCharacterLengthMatchesGroup() {
         for kana in KanaData.all {
-            XCTAssertEqual(kana.character.count, 1)
+            let expected = kana.group == .yoon ? 2 : 1
+            XCTAssertEqual(kana.character.count, expected, "\(kana.character)")
         }
     }
 
@@ -70,6 +77,10 @@ final class KanaDataTests: XCTestCase {
         XCTAssertEqual(romaji(of: "ヲ"), "wo")
         XCTAssertEqual(romaji(of: "ヅ"), "zu")
         XCTAssertEqual(romaji(of: "ポ"), "po")
+        XCTAssertEqual(romaji(of: "きゃ"), "kya")
+        XCTAssertEqual(romaji(of: "じゃ"), "ja")
+        XCTAssertEqual(romaji(of: "シャ"), "sha")
+        XCTAssertEqual(romaji(of: "ピョ"), "pyo")
     }
 
     func testHiraganaAndKatakanaShareRomajiSequence() {

@@ -6,11 +6,12 @@ public enum KanaScript: String, CaseIterable, Codable, Sendable {
     case katakana
 }
 
-/// 발음 그룹: 청음(기본 46자), 탁음, 반탁음.
+/// 발음 그룹: 청음(기본 46자), 탁음, 반탁음, 요음(きゃ 등).
 public enum KanaGroup: String, CaseIterable, Codable, Sendable {
     case basic
     case dakuon
     case handakuon
+    case yoon
 }
 
 /// 가나 한 글자와 로마자 표기.

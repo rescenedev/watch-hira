@@ -7,6 +7,9 @@ options:
 packages:
   KanaCore:
     path: KanaCore
+  ZIPFoundation:
+    url: https://github.com/weichsel/ZIPFoundation
+    from: "0.9.16"
 schemes:
   KanaStudy:
     build:
@@ -46,6 +49,7 @@ targets:
       - App
     dependencies:
       - package: KanaCore
+      - package: ZIPFoundation
       - target: KanaWidgetiOS
         embed: true
     settings:

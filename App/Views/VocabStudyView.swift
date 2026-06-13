@@ -6,6 +6,7 @@ import KanaCore
 struct VocabStudyView: View {
     let title: String
     let words: [VocabWord]
+    var deckKind: VocabDeckKind?
 
     @State private var deck: [VocabWord] = []
     @State private var currentIndex = 0
@@ -13,8 +14,13 @@ struct VocabStudyView: View {
     var body: some View {
         TabView(selection: $currentIndex) {
             ForEach(Array(deck.enumerated()), id: \.element.id) { index, word in
-                VocabCardView(word: word, onAdvance: advance, onRetreat: retreat)
-                    .tag(index)
+                VocabCardView(
+                    word: word,
+                    deckKind: deckKind,
+                    onAdvance: advance,
+                    onRetreat: retreat
+                )
+                .tag(index)
             }
         }
         .vocabPagingStyle()
@@ -26,10 +32,12 @@ struct VocabStudyView: View {
     private func prepareDeck() {
         guard deck.isEmpty else { return }
         deck = words.shuffled()
+        StudyLogStore.shared.record()
     }
 
     private func advance() {
         guard !deck.isEmpty else { return }
+        StudyLogStore.shared.record()
         withAnimation {
             currentIndex = (currentIndex + 1) % deck.count
         }
@@ -66,8 +74,11 @@ private extension View {
 /// 단어 카드 한 장: 단어, 읽기, 뜻을 바로 보여준다.
 struct VocabCardView: View {
     let word: VocabWord
+    var deckKind: VocabDeckKind?
     var onAdvance: () -> Void = {}
     var onRetreat: () -> Void = {}
+
+    @AppStorage("autoSpeak") private var autoSpeak = false
 
     #if os(watchOS)
     private let wordSize: CGFloat = 34
@@ -96,11 +107,23 @@ struct VocabCardView: View {
                     .font(meaningFont)
                     .foregroundStyle(Theme.slate300)
                     .multilineTextAlignment(.center)
+
+                HStack(spacing: 4) {
+                    SpeakerButton(text: word.reading)
+                    if let deckKind {
+                        StarButton(itemID: word.quizItem(deck: deckKind).id)
+                    }
+                }
             }
             .padding(.horizontal, 8)
             .frame(width: geometry.size.width, height: geometry.size.height)
             .contentShape(Rectangle())
             .cardTapNavigation(width: geometry.size.width, onAdvance: onAdvance, onRetreat: onRetreat)
+        }
+        .onAppear {
+            if autoSpeak {
+                SpeechService.shared.speakJapanese(word.reading)
+            }
         }
     }
 

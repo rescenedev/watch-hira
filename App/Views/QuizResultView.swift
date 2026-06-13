@@ -5,10 +5,8 @@ import KanaCore
 struct QuizResultView: View {
     let score: Int
     let total: Int
-    let script: KanaScript
+    let scoreKey: String
     let onRestart: () -> Void
-
-    private var bestScoreKey: String { "bestScore.\(script.rawValue)" }
 
     var body: some View {
         ScrollView {
@@ -46,14 +44,14 @@ struct QuizResultView: View {
 
     private func updateBestScore() {
         let defaults = UserDefaults.standard
-        if score > defaults.integer(forKey: bestScoreKey) {
-            defaults.set(score, forKey: bestScoreKey)
+        if score > defaults.integer(forKey: scoreKey) {
+            defaults.set(score, forKey: scoreKey)
         }
     }
 }
 
 #Preview {
     NavigationStack {
-        QuizResultView(score: 8, total: 10, script: .hiragana, onRestart: {})
+        QuizResultView(score: 8, total: 10, scoreKey: "bestScore.preview", onRestart: {})
     }
 }

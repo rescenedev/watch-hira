@@ -1,10 +1,11 @@
 import SwiftUI
 import KanaCore
 
-/// 4지선다 퀴즈: 가나를 보고 로마자를 고른다.
+/// 4지선다 퀴즈: 문제를 보고 올바른 답을 고른다. 오답은 복습 상자에 쌓인다.
 struct QuizView: View {
-    let script: KanaScript
-    let pool: [Kana]
+    let title: String
+    let items: [QuizItem]
+    let scoreKey: String
 
     private static let questionCount = 10
 
@@ -24,7 +25,7 @@ struct QuizView: View {
                 QuizResultView(
                     score: score,
                     total: questions.count,
-                    script: script,
+                    scoreKey: scoreKey,
                     onRestart: startQuiz
                 )
             } else if let question = currentQuestion {
@@ -34,7 +35,7 @@ struct QuizView: View {
             }
         }
         .slateScreen()
-        .navigationTitle(isFinished ? "결과" : "퀴즈")
+        .navigationTitle(isFinished ? "결과" : title)
         .onAppear(perform: startQuiz)
     }
 
@@ -44,9 +45,9 @@ struct QuizView: View {
 
     private var promptSize: CGFloat {
         #if os(watchOS)
-        48
+        44
         #else
-        110
+        96
         #endif
     }
 
@@ -57,8 +58,10 @@ struct QuizView: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
 
-                Text(question.prompt.character)
+                Text(question.item.prompt)
                     .font(.system(size: promptSize, weight: .bold))
+                    .minimumScaleFactor(0.4)
+                    .lineLimit(1)
 
                 ForEach(question.choices, id: \.self) { choice in
                     ChoiceButton(
@@ -69,6 +72,9 @@ struct QuizView: View {
                     }
                 }
             }
+            #if os(iOS)
+            .padding(.horizontal)
+            #endif
         }
     }
 
@@ -84,6 +90,9 @@ struct QuizView: View {
         selectedChoice = choice
         if choice == question.answer {
             score += 1
+            ReviewStore.shared.recordCorrect(id: question.item.id)
+        } else {
+            ReviewStore.shared.recordWrong(id: question.item.id)
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
             advance()
@@ -101,7 +110,7 @@ struct QuizView: View {
 
     private func startQuiz() {
         do {
-            questions = try QuizEngine.makeQuiz(from: pool, questionCount: Self.questionCount)
+            questions = try QuizEngine.makeQuiz(from: items, questionCount: Self.questionCount)
             currentIndex = 0
             score = 0
             selectedChoice = nil
@@ -127,6 +136,8 @@ struct ChoiceButton: View {
         Button(action: action) {
             Text(label)
                 .font(.body)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
                 .frame(maxWidth: .infinity)
         }
         .tint(tint)
@@ -145,8 +156,9 @@ struct ChoiceButton: View {
 #Preview {
     NavigationStack {
         QuizView(
-            script: .hiragana,
-            pool: KanaData.kana(script: .hiragana, groups: [.basic])
+            title: "퀴즈",
+            items: KanaData.kana(script: .hiragana, groups: [.basic]).map(\.quizItem),
+            scoreKey: "bestScore.hiragana"
         )
     }
 }
