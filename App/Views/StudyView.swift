@@ -102,10 +102,12 @@ struct KanaCardView: View {
 
                 wordList
 
-                HStack(spacing: 4) {
+                HStack {
                     SpeakerButton(text: kana.character)
+                    Spacer()
                     StarButton(itemID: kana.quizItem.id)
                 }
+                .padding(.horizontal, 24)
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
             .contentShape(Rectangle())

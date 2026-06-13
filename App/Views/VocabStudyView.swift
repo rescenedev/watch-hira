@@ -108,12 +108,14 @@ struct VocabCardView: View {
                     .foregroundStyle(Theme.slate300)
                     .multilineTextAlignment(.center)
 
-                HStack(spacing: 4) {
+                HStack {
                     SpeakerButton(text: word.reading)
                     if let deckKind {
+                        Spacer()
                         StarButton(itemID: word.quizItem(deck: deckKind).id)
                     }
                 }
+                .padding(.horizontal, 24)
             }
             .padding(.horizontal, 8)
             .frame(width: geometry.size.width, height: geometry.size.height)
