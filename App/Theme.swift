@@ -86,4 +86,26 @@ extension View {
         self
         #endif
     }
+
+    /// 카드 탭 내비게이션.
+    /// watchOS: 탭 = 다음 (이전은 디지털 크라운 스크롤).
+    /// iOS: 오른쪽 절반 탭 = 다음, 왼쪽 절반 탭 = 이전.
+    @ViewBuilder
+    func cardTapNavigation(
+        width: CGFloat,
+        onAdvance: @escaping () -> Void,
+        onRetreat: @escaping () -> Void
+    ) -> some View {
+        #if os(watchOS)
+        onTapGesture(perform: onAdvance)
+        #else
+        onTapGesture(coordinateSpace: .local) { location in
+            if location.x < width / 2 {
+                onRetreat()
+            } else {
+                onAdvance()
+            }
+        }
+        #endif
+    }
 }

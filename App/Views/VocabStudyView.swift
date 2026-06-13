@@ -100,13 +100,7 @@ struct VocabCardView: View {
             .padding(.horizontal, 8)
             .frame(width: geometry.size.width, height: geometry.size.height)
             .contentShape(Rectangle())
-            .onTapGesture(coordinateSpace: .local) { location in
-                if location.x < geometry.size.width / 2 {
-                    onRetreat()
-                } else {
-                    onAdvance()
-                }
-            }
+            .cardTapNavigation(width: geometry.size.width, onAdvance: onAdvance, onRetreat: onRetreat)
         }
     }
 
