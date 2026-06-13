@@ -7,6 +7,7 @@ enum LaunchRoute: Equatable {
     case study(KanaScript)
     case browse(KanaScript)
     case quiz(KanaScript)
+    case vocab(VocabDeckKind)
 
     static func parse(
         arguments: [String] = ProcessInfo.processInfo.arguments
@@ -20,6 +21,10 @@ enum LaunchRoute: Equatable {
         case "study": return .study(script)
         case "browse": return .browse(script)
         case "quiz": return .quiz(script)
+        case "vocab":
+            let kind = Self.value(of: "--deck", in: arguments)
+                .flatMap(VocabDeckKind.init(rawValue:)) ?? .jlptN3
+            return .vocab(kind)
         default: return nil
         }
     }

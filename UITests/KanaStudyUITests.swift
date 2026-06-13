@@ -52,6 +52,20 @@ final class KanaStudyUITests: XCTestCase {
         )
     }
 
+    func testVocabDeckShowsWordCard() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        app.staticTexts["JLPT N3"].tap()
+
+        let studyLink = app.staticTexts["공부하기"]
+        XCTAssertTrue(studyLink.waitForExistence(timeout: 10))
+        studyLink.tap()
+
+        let meaningOrWord = app.staticTexts.element(boundBy: 1)
+        XCTAssertTrue(meaningOrWord.waitForExistence(timeout: 10), "단어 카드가 보여야 합니다")
+    }
+
     func testQuizFlowShowsQuestionAndAcceptsAnswer() throws {
         let app = XCUIApplication()
         app.launch()

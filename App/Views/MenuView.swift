@@ -15,12 +15,25 @@ struct MenuView: View {
             }
             .slateRowOnIOS()
             .noSeparatorOnIOS()
+            NavigationLink(value: VocabDeckKind.jlptN3) {
+                ScriptRow(title: "JLPT N3", sample: "시험 대비 핵심 단어")
+            }
+            .slateRowOnIOS()
+            .noSeparatorOnIOS()
+            NavigationLink(value: VocabDeckKind.travel) {
+                ScriptRow(title: "여행", sample: "여행에서 바로 쓰는 단어")
+            }
+            .slateRowOnIOS()
+            .noSeparatorOnIOS()
         }
         .spacedListOnIOS()
         .slateScreenOnIOS()
         .navigationTitle("가나 학습")
         .navigationDestination(for: KanaScript.self) { script in
             ScriptHomeView(script: script)
+        }
+        .navigationDestination(for: VocabDeckKind.self) { kind in
+            VocabHomeView(kind: kind)
         }
     }
 }

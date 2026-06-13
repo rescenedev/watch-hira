@@ -28,6 +28,8 @@ struct KanaStudyApp: App {
             )
         case .quiz(let script):
             QuizView(script: script, pool: KanaData.kana(script: script, groups: [.basic]))
+        case .vocab(let kind):
+            VocabStudyView(title: kind.title, words: VocabData.words(for: kind))
         case nil:
             MenuView()
         }
