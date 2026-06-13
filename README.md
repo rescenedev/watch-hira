@@ -1,6 +1,8 @@
-# 가나 학습 (KanaStudy)
+# 일본어공부 (KanaStudy)
 
-히라가나·가타카나를 공부할 수 있는 watchOS 앱.
+히라가나·가타카나부터 JLPT 단어·여행 회화까지, iPhone과 Apple Watch에서 익히는 일본어 학습 앱.
+
+🔗 **랜딩 페이지: https://rescenedev.github.io/watch-hira/**
 
 ## 기능
 
