@@ -91,6 +91,10 @@ struct VocabCardView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: spacing) {
+                #if os(iOS)
+                Spacer()
+                #endif
+
                 Text(word.word)
                     .font(.system(size: wordSize, weight: .bold))
                     .minimumScaleFactor(0.4)
@@ -108,14 +112,7 @@ struct VocabCardView: View {
                     .foregroundStyle(Theme.slate300)
                     .multilineTextAlignment(.center)
 
-                HStack {
-                    SpeakerButton(text: word.reading)
-                    if let deckKind {
-                        Spacer()
-                        StarButton(itemID: word.quizItem(deck: deckKind).id)
-                    }
-                }
-                .padding(.horizontal, 24)
+                buttonRow
             }
             .padding(.horizontal, 8)
             .frame(width: geometry.size.width, height: geometry.size.height)
@@ -127,6 +124,29 @@ struct VocabCardView: View {
                 SpeechService.shared.speakJapanese(word.reading)
             }
         }
+    }
+
+    @ViewBuilder
+    private var buttonRow: some View {
+        #if os(iOS)
+        Spacer()
+        HStack(spacing: 48) {
+            SpeakerButton(text: word.reading, pointSize: 40)
+            if let deckKind {
+                StarButton(itemID: word.quizItem(deck: deckKind).id, pointSize: 38)
+            }
+        }
+        .padding(.bottom, 36)
+        #else
+        HStack {
+            SpeakerButton(text: word.reading)
+            if let deckKind {
+                Spacer()
+                StarButton(itemID: word.quizItem(deck: deckKind).id)
+            }
+        }
+        .padding(.horizontal, 24)
+        #endif
     }
 
     private var readingFont: Font {

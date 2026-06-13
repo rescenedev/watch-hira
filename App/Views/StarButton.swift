@@ -3,6 +3,7 @@ import SwiftUI
 /// 즐겨찾기 토글 별표 버튼.
 struct StarButton: View {
     let itemID: String
+    var pointSize: CGFloat? = nil
 
     @ObservedObject private var store = FavoritesStore.shared
 
@@ -11,7 +12,7 @@ struct StarButton: View {
             store.toggle(id: itemID)
         } label: {
             Image(systemName: store.contains(id: itemID) ? "star.fill" : "star")
-                .font(starFont)
+                .font(resolvedFont)
                 .foregroundStyle(store.contains(id: itemID) ? .yellow : Theme.slate400)
                 .padding(6)
         }
@@ -19,11 +20,14 @@ struct StarButton: View {
         .accessibilityLabel("즐겨찾기")
     }
 
-    private var starFont: Font {
+    private var resolvedFont: Font {
+        if let pointSize {
+            return .system(size: pointSize)
+        }
         #if os(watchOS)
-        .footnote
+        return .footnote
         #else
-        .title3
+        return .title3
         #endif
     }
 }

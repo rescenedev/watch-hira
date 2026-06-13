@@ -92,6 +92,10 @@ struct KanaCardView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: cardSpacing) {
+                #if os(iOS)
+                Spacer()
+                #endif
+
                 Text(kana.character)
                     .font(.system(size: glyphSize, weight: .bold))
                     .minimumScaleFactor(0.5)
@@ -102,12 +106,7 @@ struct KanaCardView: View {
 
                 wordList
 
-                HStack {
-                    SpeakerButton(text: kana.character)
-                    Spacer()
-                    StarButton(itemID: kana.quizItem.id)
-                }
-                .padding(.horizontal, 24)
+                buttonRow
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
             .contentShape(Rectangle())
@@ -119,6 +118,25 @@ struct KanaCardView: View {
                 SpeechService.shared.speakJapanese(kana.character)
             }
         }
+    }
+
+    @ViewBuilder
+    private var buttonRow: some View {
+        #if os(iOS)
+        Spacer()
+        HStack(spacing: 48) {
+            SpeakerButton(text: kana.character, pointSize: 40)
+            StarButton(itemID: kana.quizItem.id, pointSize: 38)
+        }
+        .padding(.bottom, 36)
+        #else
+        HStack {
+            SpeakerButton(text: kana.character)
+            Spacer()
+            StarButton(itemID: kana.quizItem.id)
+        }
+        .padding(.horizontal, 24)
+        #endif
     }
 
     private var romajiFont: Font {
