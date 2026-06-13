@@ -23,8 +23,10 @@ final class SpeechService {
         synthesizer.speak(utterance)
     }
 
+    /// iOS·watchOS 모두 재생 전에 오디오 세션을 활성화한다.
+    /// `.playback` 카테고리는 무음 스위치를 무시하고 소리를 낸다.
     private func activateAudioSession() {
-        #if os(watchOS)
+        #if os(iOS) || os(watchOS)
         let session = AVAudioSession.sharedInstance()
         try? session.setCategory(.playback, mode: .default, options: [.duckOthers])
         try? session.setActive(true, options: [])
