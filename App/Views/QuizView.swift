@@ -6,6 +6,8 @@ struct QuizView: View {
     let title: String
     let items: [QuizItem]
     let scoreKey: String
+    /// 스크린샷용: 첫 문제에서 오답이 선택된 상태로 띄워 정답/오답 색을 보여준다.
+    var revealDemo = false
 
     private static let questionCount = 10
 
@@ -116,6 +118,11 @@ struct QuizView: View {
             selectedChoice = nil
             isFinished = false
             loadFailed = false
+
+            if revealDemo, let first = questions.first {
+                // 자동 넘김 없이 오답 선택 상태로 고정 (스크린샷용).
+                selectedChoice = first.choices.first { $0 != first.answer }
+            }
         } catch {
             loadFailed = true
         }

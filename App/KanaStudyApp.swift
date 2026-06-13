@@ -26,11 +26,12 @@ struct KanaStudyApp: App {
                 title: script == .hiragana ? "히라가나" : "가타카나",
                 kanaList: KanaData.kana(script: script, groups: [.basic])
             )
-        case .quiz(let script):
+        case .quiz(let script, let reveal):
             QuizView(
                 title: "퀴즈",
                 items: KanaData.kana(script: script, groups: [.basic]).map(\.quizItem),
-                scoreKey: "bestScore.\(script.rawValue)"
+                scoreKey: "bestScore.\(script.rawValue)",
+                revealDemo: reveal
             )
         case .vocab(let kind):
             VocabStudyView(title: kind.title, words: VocabData.words(for: kind), deckKind: kind)

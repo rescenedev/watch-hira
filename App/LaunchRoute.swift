@@ -6,7 +6,7 @@ import KanaCore
 enum LaunchRoute: Equatable {
     case study(KanaScript)
     case browse(KanaScript)
-    case quiz(KanaScript)
+    case quiz(KanaScript, reveal: Bool)
     case vocab(VocabDeckKind)
 
     static func parse(
@@ -20,7 +20,7 @@ enum LaunchRoute: Equatable {
         switch screen {
         case "study": return .study(script)
         case "browse": return .browse(script)
-        case "quiz": return .quiz(script)
+        case "quiz": return .quiz(script, reveal: arguments.contains("--reveal"))
         case "vocab":
             let kind = Self.value(of: "--deck", in: arguments)
                 .flatMap(VocabDeckKind.init(rawValue:)) ?? .jlptN3
