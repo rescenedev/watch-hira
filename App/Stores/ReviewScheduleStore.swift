@@ -28,14 +28,27 @@ final class ReviewScheduleStore: ObservableObject {
         }
     }
 
-    /// 지금 복습 목록에 보여야 하는가(영구 제거 X, 스누즈 만료 O).
+    /// 지금 복습 목록에 보여야 하는가(보관함 X, 스누즈 만료 O).
     func isDue(_ id: String, now: Date = Date()) -> Bool {
         if state.mastered.contains(id) { return false }
         guard let entry = state.entries[id] else { return true }
         return entry.dueDate <= now
     }
 
-    /// 스와이프로 미루기: 단계 상승. 마지막(1달) 다음이면 영구 제거.
+    /// 다 외워서 보관함으로 옮겨졌는가.
+    func isMastered(_ id: String) -> Bool {
+        state.mastered.contains(id)
+    }
+
+    /// 다시 복습 목록에 뜨기까지 남은 일수(스누즈 중일 때만). 아니면 nil.
+    func daysUntilDue(_ id: String, now: Date = Date()) -> Int? {
+        guard let entry = state.entries[id], entry.dueDate > now else { return nil }
+        let cal = Calendar.current
+        let days = cal.dateComponents([.day], from: cal.startOfDay(for: now), to: cal.startOfDay(for: entry.dueDate)).day ?? 0
+        return max(days, 1)
+    }
+
+    /// 스와이프로 미루기: 단계 상승(이틀 → 일주일 → 한달). 마지막 다음이면 보관함으로.
     /// 반환값은 사용자에게 보여줄 안내 문구.
     @discardableResult
     func snooze(_ id: String, now: Date = Date()) -> String {
@@ -44,7 +57,7 @@ final class ReviewScheduleStore: ObservableObject {
             state.entries[id] = nil
             if !state.mastered.contains(id) { state.mastered.append(id) }
             save()
-            return "다 외웠어요! 이제 안 보여드려요"
+            return "영원히 안녕.."
         }
         let days = Self.intervalDays(for: nextStage)
         state.entries[id] = Entry(
@@ -52,14 +65,22 @@ final class ReviewScheduleStore: ObservableObject {
             dueDate: Calendar.current.date(byAdding: .day, value: days, to: now) ?? now
         )
         save()
-        return "\(days)일 뒤에 다시 알려드릴게요"
+        return Self.snoozeMessage(for: nextStage)
     }
 
     private static func intervalDays(for stage: Int) -> Int {
         switch stage {
-        case 1: return 3
+        case 1: return 2
         case 2: return 7
         default: return 30
+        }
+    }
+
+    private static func snoozeMessage(for stage: Int) -> String {
+        switch stage {
+        case 1: return "첫번째 암기 완료! 이틀 뒤에 다시 알려드립니다"
+        case 2: return "두번째 암기 완료! 일주일 뒤에 다시 알려드립니다"
+        default: return "세번째 암기 완료! 한달 뒤에 다시 알려드립니다"
         }
     }
 
