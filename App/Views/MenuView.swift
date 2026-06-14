@@ -112,6 +112,14 @@ struct MenuView: View {
             DailyReminderToggle()
                 .slateRowOnIOS()
                 .noSeparatorOnIOS()
+
+            Text("예문 일부 © Tatoeba 프로젝트 (CC BY)")
+                .font(.caption2)
+                .foregroundStyle(Theme.slate400)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 4)
+                .listRowBackground(Color.clear)
+                .noSeparatorOnIOS()
             #endif
         }
         .spacedListOnIOS()
