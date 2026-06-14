@@ -343,54 +343,60 @@ private struct ArchiveRow: View {
     let entry: ArchivedEntry
 
     var body: some View {
-        let display = displayWord
-        VStack(alignment: .leading, spacing: 3) {
-            HStack(spacing: 6) {
-                Text(display.front)
-                    .font(.subheadline)
-                    .foregroundStyle(Theme.slate300)
-                if let reading = display.reading {
-                    Text(reading)
-                        .font(.caption2)
-                        .foregroundStyle(Theme.mint.opacity(0.8))
-                }
-                Text(display.meaning)
-                    .font(.caption2)
-                    .foregroundStyle(Theme.slate400)
-                Spacer(minLength: 6)
-                if !entry.badge.isEmpty {
-                    Text(entry.badge)
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(entry.badge == "완료" ? Theme.mint : Theme.slate300)
-                        .padding(.horizontal, 7)
-                        .padding(.vertical, 3)
-                        .background(Theme.slate800, in: Capsule())
+        HStack(alignment: .center, spacing: 12) {
+            // 글자 + 그 아래 초록 보조 표기 (배운 단어 행과 동일)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(entry.item.front)
+                    .font(.headline)
+                if let secondary = secondaryText {
+                    Text(secondary)
+                        .font(.caption)
+                        .foregroundStyle(Theme.mint)
+                        .lineLimit(1)
                 }
             }
+            .frame(width: 72, alignment: .leading)
+
+            // 예문 (가운데 칸)
             if let sentence = exampleSentence {
-                Text(sentence.japanese)
-                    .font(.caption)
-                    .foregroundStyle(Theme.slate400)
-                if let korean = sentence.korean {
-                    Text(korean)
-                        .font(.caption2)
-                        .foregroundStyle(Theme.slate400.opacity(0.75))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(sentence.japanese)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.slate300)
+                        .lineLimit(2)
+                    if let korean = sentence.korean {
+                        Text(korean)
+                            .font(.caption)
+                            .foregroundStyle(Theme.slate400)
+                            .lineLimit(2)
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                Spacer(minLength: 0)
+            }
+
+            // 배지 (완료 / D-N)
+            if !entry.badge.isEmpty {
+                Text(entry.badge)
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(entry.badge == "완료" ? Theme.mint : Theme.slate300)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 3)
+                    .background(Theme.slate800, in: Capsule())
             }
         }
         .padding(.vertical, 2)
     }
 
-    /// 단어는 그대로, 가나는 예시 단어로 바꿔 표시한다(저장된 것 우선).
-    private var displayWord: (front: String, reading: String?, meaning: String) {
-        let item = entry.item
-        if let example = item.example, let word = example.word {
-            return (word, nil, example.wordMeaning ?? item.meaning)
+    /// 글자 옆 초록 보조: 단어는 읽기, 가나는 예시 단어(저장된 것 우선).
+    private var secondaryText: String? {
+        if let reading = entry.item.reading { return reading }
+        if let example = entry.item.example, let word = example.word { return word }
+        if entry.item.id.hasPrefix("kana:") {
+            return KanaWordBank.words(forCharacter: entry.item.front).first?.word
         }
-        if item.id.hasPrefix("kana:"), let word = KanaWordBank.words(forCharacter: item.front).first {
-            return (word.word, nil, word.meaning)
-        }
-        return (item.front, item.reading, item.meaning)
+        return nil
     }
 
     /// 저장된 예문 우선, 없으면(옛 기록) 다시 계산.
