@@ -203,6 +203,20 @@
   }
   .shot img { width: 100%; border-radius: 28px; display: block; }
   .shot .cap { text-align: center; font-size: 13px; color: var(--ink-faint); padding: 14px 0 6px; }
+  /* watch screens: square, rounder frame */
+  .shot.watch-shot { width: 250px; border-radius: 46px; padding: 12px; background: linear-gradient(160deg,#2a2c45,#0e0f1d); }
+  .shot.watch-shot img { border-radius: 36px; }
+
+  /* platform tabs */
+  .tabs { display: inline-flex; gap: 6px; margin-top: 32px; padding: 6px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,0.03); }
+  .tab {
+    font-family: inherit; font-size: 15px; font-weight: 600; color: var(--ink-dim);
+    padding: 10px 24px; border-radius: 999px; cursor: pointer; border: none; background: transparent;
+    transition: color 0.3s var(--ease), background 0.3s var(--ease);
+  }
+  .tab:hover { color: var(--ink); }
+  .tab.active { color: #04120a; background: linear-gradient(150deg, var(--mint), var(--mint-deep)); }
+  .gallery[hidden] { display: none; }
 
   /* CTA */
   .cta {
@@ -310,8 +324,8 @@
       </div>
       <div class="card col-3 reveal" style="transition-delay:.06s">
         <div class="ico">⏰</div>
-        <h3>간격 반복 복습 알림</h3>
-        <p>아침마다 복습할 단어를 알림으로. 외운 단어는 스와이프하면 3일 → 1주 → 1달로 간격이 멀어지다 사라집니다.</p>
+        <h3>간격 반복 복습</h3>
+        <p>아침마다 복습할 단어를 알림으로 — 누르면 바로 배운 단어 화면으로. 외웠으면 스와이프, 이틀 → 일주일 → 한달로 멀어지다 보관함으로 졸업합니다.</p>
       </div>
     </div>
   </div>
@@ -334,17 +348,33 @@
   </div>
 </section>
 
-<section style="padding-top:0;">
+<section id="screens" style="padding-top:0;">
   <div class="wrap">
     <div class="sec-head reveal">
       <div class="sec-tag">SCREENS</div>
       <h2 class="sec-title">담백하게, 또렷하게.</h2>
+      <p class="sec-sub">iPhone에서는 예문까지 한 화면에, Apple Watch에서는 군더더기 없이 단어만.</p>
     </div>
-    <div class="gallery">
-      <div class="shot reveal"><img src="assets/menu.png" alt="메뉴" /><div class="cap">메뉴</div></div>
-      <div class="shot reveal" style="transition-delay:.05s"><img src="assets/study.png" alt="공부하기" /><div class="cap">공부하기</div></div>
-      <div class="shot reveal" style="transition-delay:.1s"><img src="assets/vocab.png" alt="JLPT 단어" /><div class="cap">JLPT N3 단어</div></div>
-      <div class="shot reveal" style="transition-delay:.15s"><img src="assets/quiz.png" alt="퀴즈" /><div class="cap">4지선다 퀴즈</div></div>
+
+    <div class="tabs reveal" role="tablist">
+      <button class="tab active" data-tab="ios" role="tab">iPhone</button>
+      <button class="tab" data-tab="watch" role="tab">Apple Watch</button>
+    </div>
+
+    <div class="gallery" data-pane="ios">
+      <div class="shot reveal"><img src="assets/menu.png" alt="메뉴" loading="lazy" /><div class="cap">메뉴 · 진도</div></div>
+      <div class="shot reveal" style="transition-delay:.05s"><img src="assets/review.png" alt="배운 단어" loading="lazy" /><div class="cap">배운 단어 · 예문</div></div>
+      <div class="shot reveal" style="transition-delay:.1s"><img src="assets/study.png" alt="공부하기" loading="lazy" /><div class="cap">공부하기</div></div>
+      <div class="shot reveal" style="transition-delay:.15s"><img src="assets/vocab.png" alt="JLPT 단어" loading="lazy" /><div class="cap">JLPT N3 단어</div></div>
+      <div class="shot reveal" style="transition-delay:.2s"><img src="assets/quiz.png" alt="퀴즈" loading="lazy" /><div class="cap">4지선다 퀴즈</div></div>
+    </div>
+
+    <div class="gallery" data-pane="watch" hidden>
+      <div class="shot watch-shot reveal"><img src="assets/watch_menu.png" alt="워치 메뉴" loading="lazy" /><div class="cap">메뉴</div></div>
+      <div class="shot watch-shot reveal" style="transition-delay:.05s"><img src="assets/watch_card.png" alt="워치 학습 카드" loading="lazy" /><div class="cap">학습 카드</div></div>
+      <div class="shot watch-shot reveal" style="transition-delay:.1s"><img src="assets/watch_review.png" alt="워치 배운 단어" loading="lazy" /><div class="cap">배운 단어</div></div>
+      <div class="shot watch-shot reveal" style="transition-delay:.15s"><img src="assets/watch_swipe.png" alt="외웠어요 스와이프" loading="lazy" /><div class="cap">외웠어요 스와이프</div></div>
+      <div class="shot watch-shot reveal" style="transition-delay:.2s"><img src="assets/watch_archive.png" alt="보관함" loading="lazy" /><div class="cap">보관함 · D-2</div></div>
     </div>
   </div>
 </section>
@@ -382,6 +412,18 @@
   const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > 12);
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
+
+  // iOS / watchOS screen tabs
+  document.querySelectorAll(".tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t === tab));
+      document.querySelectorAll(".gallery[data-pane]").forEach((g) => {
+        const show = g.dataset.pane === tab.dataset.tab;
+        g.hidden = !show;
+        if (show) g.querySelectorAll(".reveal").forEach((el) => el.classList.add("in"));
+      });
+    });
+  });
 </script>
 </body>
 </html>
