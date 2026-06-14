@@ -22,6 +22,11 @@ public enum KanaWordBank {
         }
     }
 
+    /// 가나 한 글자로 예시 단어를 찾는다. 히라가나·가타카나 표를 모두 확인한다.
+    public static func words(forCharacter character: String) -> [KanaWord] {
+        hiraganaWordTable[character] ?? katakanaWordTable[character] ?? []
+    }
+
     /// 예시 단어 중 무작위로 최대 `count`개를 고른다. 호출할 때마다 달라진다.
     public static func randomWords(for kana: Kana, count: Int) -> [KanaWord] {
         var generator = SystemRandomNumberGenerator()

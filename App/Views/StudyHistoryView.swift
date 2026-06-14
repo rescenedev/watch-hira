@@ -32,16 +32,12 @@ struct StudyHistoryView: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "book.closed")
-                .font(.system(size: 36))
-                .foregroundStyle(Theme.mint)
-            Text("카드를 넘기면\n날짜별로 모아서 보여드려요")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .padding()
+        Text("카드를 넘기면\n날짜별로 모아서 보여드려요")
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding()
     }
 
     private static func sectionTitle(for day: Date, count: Int) -> String {
@@ -69,47 +65,60 @@ private struct StudyHistoryRow: View {
     let item: StudiedItem
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
+        HStack(alignment: .center, spacing: 12) {
+            // 글자
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Text(item.front)
                         .font(.headline)
                     if let reading = item.reading {
                         Text(reading)
-                            .font(.caption)
+                            .font(.caption2)
                             .foregroundStyle(Theme.mint)
                     }
                 }
                 Text(item.meaning)
-                    .font(.caption)
+                    .font(.caption2)
                     .foregroundStyle(Theme.slate400)
-
-                #if os(iOS)
-                if let example {
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(example.japanese)
-                            .font(.caption)
-                            .foregroundStyle(Theme.slate300)
-                        if let korean = example.korean {
-                            Text(korean)
-                                .font(.caption2)
-                                .foregroundStyle(Theme.slate400)
-                        }
-                    }
-                    .padding(.top, 2)
-                }
-                #endif
             }
-            Spacer(minLength: 8)
+            .frame(width: 96, alignment: .leading)
+
+            // 문장 (글자와 소리 사이 가운데)
+            #if os(iOS)
+            if let example {
+                VStack(alignment: .center, spacing: 1) {
+                    Text(example.japanese)
+                        .font(.caption)
+                        .foregroundStyle(Theme.slate300)
+                    if let korean = example.korean {
+                        Text(korean)
+                            .font(.caption2)
+                            .foregroundStyle(Theme.slate400)
+                    }
+                }
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, alignment: .center)
+            } else {
+                Spacer(minLength: 0)
+            }
+            #else
+            Spacer(minLength: 0)
+            #endif
+
+            // 소리
             SpeakerButton(text: item.reading ?? item.front)
         }
         .padding(.vertical, 2)
     }
 
     #if os(iOS)
-    /// 단어에는 짧은 예문을 붙인다. 가나(한 글자)는 예문 없이 글자만 보여준다.
+    /// 단어에는 짧은 예문을, 가나에는 그 글자가 든 예시 단어 하나를 보여준다.
     private var example: ExampleSentence? {
-        guard !item.id.hasPrefix("kana:") else { return nil }
+        if item.id.hasPrefix("kana:") {
+            // 가나는 그 글자가 든 예시 단어로 짧은 문장을 보여준다.
+            guard let word = KanaWordBank.words(forCharacter: item.front).first else { return nil }
+            return ExampleSentenceBank.sentence(forWord: word.word)
+        }
         return ExampleSentenceBank.sentence(forWord: item.front)
     }
     #endif
