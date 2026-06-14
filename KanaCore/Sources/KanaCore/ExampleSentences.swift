@@ -21,6 +21,10 @@ public enum ExampleSentenceBank {
         if let curated = table[word] {
             return curated
         }
+        // Tatoeba 한-일 실제 용례(큐레이션에 없는 단어의 빈자리).
+        if let tatoeba = tatoebaExamples[word] {
+            return tatoeba
+        }
         if let kana = kanaExamples[word] {
             return kana
         }

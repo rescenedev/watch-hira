@@ -50,3 +50,10 @@ xcodebuild -project KanaStudy.xcodeproj -scheme KanaStudy \
 ```sh
 cd KanaCore && swift test
 ```
+
+## 데이터 출처 / 라이선스
+
+배운 단어 화면의 일부 예문은 [Tatoeba](https://tatoeba.org) 프로젝트의 사람이 번역한 일본어↔한국어 문장쌍에서 추출했습니다. Tatoeba 데이터는 **CC BY 2.0 FR** 라이선스입니다.
+
+- 생성 스크립트: `Tools/gen_tatoeba_examples.py` (Tatoeba 덤프 → `KanaCore/Sources/KanaCore/TatoebaExamples.swift`)
+- 큐레이션 예문이 있는 단어는 그대로 쓰고, 없는 단어의 빈자리만 Tatoeba 예문으로 채웁니다.
