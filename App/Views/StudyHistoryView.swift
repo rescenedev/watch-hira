@@ -249,14 +249,14 @@ private struct StudyHistoryRow: View {
             Spacer(minLength: 0)
         }
         #else
-        if let kanaExample {
+        if let kanaWord {
             VStack(alignment: .center, spacing: 1) {
-                Text(kanaExample.word)
+                Text(kanaWord.word)
                     .font(.body)
                     .foregroundStyle(Theme.slate300)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
-                Text(kanaExample.meaning)
+                Text(kanaWord.meaning)
                     .font(.caption2)
                     .foregroundStyle(Theme.slate400)
                     .lineLimit(1)
@@ -272,23 +272,30 @@ private struct StudyHistoryRow: View {
     private var secondaryText: String? {
         if let reading = item.reading { return reading }
         #if os(iOS)
-        return kanaExample?.word
+        return kanaWord?.word
         #else
         return nil
         #endif
     }
 
-    /// 가나(한 글자)의 대표 예시 단어.
-    private var kanaExample: KanaWord? {
-        guard item.id.hasPrefix("kana:") else { return nil }
-        return KanaWordBank.words(forCharacter: item.front).first
+    /// 가나의 예시 단어(저장된 것 우선, 없으면 다시 계산).
+    private var kanaWord: (word: String, meaning: String)? {
+        if let example = item.example, let word = example.word {
+            return (word, example.wordMeaning ?? "")
+        }
+        guard item.id.hasPrefix("kana:"),
+              let word = KanaWordBank.words(forCharacter: item.front).first else { return nil }
+        return (word.word, word.meaning)
     }
 
     #if os(iOS)
-    /// 단어에는 짧은 예문을, 가나에는 그 예시 단어로 만든 문장을 보여준다.
+    /// 본 그대로 저장된 예문 우선, 없으면(옛 기록) 다시 계산.
     private var example: ExampleSentence? {
-        if let kanaExample {
-            return ExampleSentenceBank.sentence(forWord: kanaExample.word)
+        if let example = item.example {
+            return ExampleSentence(japanese: example.japanese, korean: example.korean)
+        }
+        if let kanaWord {
+            return ExampleSentenceBank.sentence(forWord: kanaWord.word)
         }
         return ExampleSentenceBank.sentence(forWord: item.front)
     }
@@ -331,33 +338,73 @@ private struct ArchiveSheet: View {
 }
 
 /// 보관함 행: 작게 한 줄 + 오른쪽에 D-N / 완료 배지.
+/// 가나(한 글자)는 그 글자가 든 예시 단어로 보여준다.
 private struct ArchiveRow: View {
     let entry: ArchivedEntry
 
     var body: some View {
-        HStack(spacing: 6) {
-            Text(entry.item.front)
-                .font(.subheadline)
-                .foregroundStyle(Theme.slate300)
-            if let reading = entry.item.reading {
-                Text(reading)
+        let display = displayWord
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 6) {
+                Text(display.front)
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.slate300)
+                if let reading = display.reading {
+                    Text(reading)
+                        .font(.caption2)
+                        .foregroundStyle(Theme.mint.opacity(0.8))
+                }
+                Text(display.meaning)
                     .font(.caption2)
-                    .foregroundStyle(Theme.mint.opacity(0.8))
+                    .foregroundStyle(Theme.slate400)
+                Spacer(minLength: 6)
+                if !entry.badge.isEmpty {
+                    Text(entry.badge)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(entry.badge == "완료" ? Theme.mint : Theme.slate300)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(Theme.slate800, in: Capsule())
+                }
             }
-            Text(entry.item.meaning)
-                .font(.caption2)
-                .foregroundStyle(Theme.slate400)
-            Spacer(minLength: 6)
-            if !entry.badge.isEmpty {
-                Text(entry.badge)
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(entry.badge == "완료" ? Theme.mint : Theme.slate300)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 3)
-                    .background(Theme.slate800, in: Capsule())
+            if let sentence = exampleSentence {
+                Text(sentence.japanese)
+                    .font(.caption)
+                    .foregroundStyle(Theme.slate400)
+                if let korean = sentence.korean {
+                    Text(korean)
+                        .font(.caption2)
+                        .foregroundStyle(Theme.slate400.opacity(0.75))
+                }
             }
         }
-        .padding(.vertical, 1)
+        .padding(.vertical, 2)
+    }
+
+    /// 단어는 그대로, 가나는 예시 단어로 바꿔 표시한다(저장된 것 우선).
+    private var displayWord: (front: String, reading: String?, meaning: String) {
+        let item = entry.item
+        if let example = item.example, let word = example.word {
+            return (word, nil, example.wordMeaning ?? item.meaning)
+        }
+        if item.id.hasPrefix("kana:"), let word = KanaWordBank.words(forCharacter: item.front).first {
+            return (word.word, nil, word.meaning)
+        }
+        return (item.front, item.reading, item.meaning)
+    }
+
+    /// 저장된 예문 우선, 없으면(옛 기록) 다시 계산.
+    private var exampleSentence: (japanese: String, korean: String?)? {
+        let item = entry.item
+        if let example = item.example {
+            return (example.japanese, example.korean)
+        }
+        if item.id.hasPrefix("kana:"), let word = KanaWordBank.words(forCharacter: item.front).first {
+            let sentence = ExampleSentenceBank.sentence(forWord: word.word)
+            return (sentence.japanese, sentence.korean)
+        }
+        let sentence = ExampleSentenceBank.sentence(forWord: item.front)
+        return (sentence.japanese, sentence.korean)
     }
 }
 

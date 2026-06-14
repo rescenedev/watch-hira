@@ -132,11 +132,13 @@ struct VocabCardView: View {
         if let deckKind {
             return word.studiedItem(deck: deckKind)
         }
+        let sentence = ExampleSentenceBank.sentence(forWord: word.word)
         return StudiedItem(
             id: "vocab:\(word.word)",
             front: word.word,
             reading: word.hasDistinctReading ? word.reading : nil,
-            meaning: word.meaning
+            meaning: word.meaning,
+            example: StudiedExample(japanese: sentence.japanese, korean: sentence.korean)
         )
     }
 

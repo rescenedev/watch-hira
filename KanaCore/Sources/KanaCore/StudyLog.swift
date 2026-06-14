@@ -1,5 +1,24 @@
 import Foundation
 
+/// 학습 항목과 함께 저장되는 예문. 본 그대로 보관해 나중에도 똑같이 보여준다.
+public struct StudiedExample: Codable, Equatable, Sendable {
+    /// 가나의 예시 단어(단어 항목이면 nil).
+    public let word: String?
+    /// 가나 예시 단어의 뜻.
+    public let wordMeaning: String?
+    /// 예문(일본어).
+    public let japanese: String
+    /// 예문 번역(한국어).
+    public let korean: String?
+
+    public init(word: String? = nil, wordMeaning: String? = nil, japanese: String, korean: String? = nil) {
+        self.word = word
+        self.wordMeaning = wordMeaning
+        self.japanese = japanese
+        self.korean = korean
+    }
+}
+
 /// 목록에 보여줄 학습 항목 한 건 (오늘 배운 단어 등).
 public struct StudiedItem: Codable, Equatable, Sendable, Identifiable {
     /// 중복 제거용 안정 식별자 (예: "kana:あ", "jlptN3:水").
@@ -10,30 +29,47 @@ public struct StudiedItem: Codable, Equatable, Sendable, Identifiable {
     public let reading: String?
     /// 뜻(단어) 또는 로마자(가나).
     public let meaning: String
+    /// 본 그대로 저장한 예문(예전 기록은 nil → 표시 시 다시 계산).
+    public let example: StudiedExample?
 
-    public init(id: String, front: String, reading: String? = nil, meaning: String) {
+    public init(id: String, front: String, reading: String? = nil, meaning: String, example: StudiedExample? = nil) {
         self.id = id
         self.front = front
         self.reading = reading
         self.meaning = meaning
+        self.example = example
     }
 }
 
 public extension Kana {
-    /// 가나 한 글자를 학습 기록 항목으로.
+    /// 가나 한 글자를 학습 기록 항목으로. 예시 단어와 그 예문을 함께 저장한다.
     var studiedItem: StudiedItem {
-        StudiedItem(id: quizItem.id, front: character, reading: nil, meaning: romaji)
+        let example: StudiedExample?
+        if let word = KanaWordBank.words(for: self).first {
+            let sentence = ExampleSentenceBank.sentence(forWord: word.word)
+            example = StudiedExample(
+                word: word.word,
+                wordMeaning: word.meaning,
+                japanese: sentence.japanese,
+                korean: sentence.korean
+            )
+        } else {
+            example = nil
+        }
+        return StudiedItem(id: quizItem.id, front: character, reading: nil, meaning: romaji, example: example)
     }
 }
 
 public extension VocabWord {
-    /// 단어 하나를 학습 기록 항목으로.
+    /// 단어 하나를 학습 기록 항목으로. 예문을 함께 저장한다.
     func studiedItem(deck: VocabDeckKind) -> StudiedItem {
-        StudiedItem(
+        let sentence = ExampleSentenceBank.sentence(forWord: word)
+        return StudiedItem(
             id: quizItem(deck: deck).id,
             front: word,
             reading: hasDistinctReading ? reading : nil,
-            meaning: meaning
+            meaning: meaning,
+            example: StudiedExample(japanese: sentence.japanese, korean: sentence.korean)
         )
     }
 }
