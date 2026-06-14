@@ -204,21 +204,16 @@ private struct StudyHistoryRow: View {
         }
         .frame(width: 72, alignment: .leading)
         #else
-        VStack(alignment: .leading, spacing: 1) {
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(item.front)
-                    .font(.headline)
-                if let reading = item.reading {
-                    Text(reading)
-                        .font(.caption2)
-                        .foregroundStyle(Theme.mint)
-                        .lineLimit(1)
-                }
+        // 워치: 글자 + 발음(읽기/로마자)을 옆에. 뜻은 가운데로 옮긴다.
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            Text(item.front)
+                .font(.headline)
+            if let pronunciation = watchPronunciation {
+                Text(pronunciation)
+                    .font(.caption2)
+                    .foregroundStyle(Theme.mint)
+                    .lineLimit(1)
             }
-            Text(item.meaning)
-                .font(.caption2)
-                .foregroundStyle(Theme.slate400)
-                .lineLimit(1)
         }
         #endif
     }
@@ -249,6 +244,7 @@ private struct StudyHistoryRow: View {
             Spacer(minLength: 0)
         }
         #else
+        // 가나는 예시 단어, 단어는 뜻을 가운데에.
         if let kanaWord {
             VStack(alignment: .center, spacing: 1) {
                 Text(kanaWord.word)
@@ -263,20 +259,32 @@ private struct StudyHistoryRow: View {
             }
             .frame(maxWidth: .infinity, alignment: .center)
         } else {
-            Spacer(minLength: 0)
+            Text(item.meaning)
+                .font(.body)
+                .foregroundStyle(Theme.slate300)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .frame(maxWidth: .infinity, alignment: .center)
         }
         #endif
     }
 
-    /// 글자 옆 보조 표기: 단어는 읽기, 가나는(iOS) 예시 단어.
+    #if os(iOS)
+    /// 글자 옆 보조 표기: 단어는 읽기, 가나는 예시 단어. (iOS 전용)
     private var secondaryText: String? {
         if let reading = item.reading { return reading }
-        #if os(iOS)
         return kanaWord?.word
-        #else
-        return nil
-        #endif
     }
+    #endif
+
+    #if os(watchOS)
+    /// 글자 옆 발음: 단어는 읽기, 가나는 로마자. (워치 전용)
+    private var watchPronunciation: String? {
+        if let reading = item.reading { return reading }
+        if item.id.hasPrefix("kana:") { return item.meaning }
+        return nil
+    }
+    #endif
 
     /// 가나의 예시 단어(저장된 것 우선, 없으면 다시 계산).
     private var kanaWord: (word: String, meaning: String)? {
@@ -376,22 +384,16 @@ private struct ArchiveRow: View {
                 Spacer(minLength: 0)
             }
             #else
-            // 워치: 학습(배운 단어) 행과 동일 — 글자+읽기/뜻, 가운데 가나 예시단어. 예문 없음.
-            VStack(alignment: .leading, spacing: 1) {
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text(entry.item.front)
-                        .font(.headline)
-                    if let reading = entry.item.reading {
-                        Text(reading)
-                            .font(.caption2)
-                            .foregroundStyle(Theme.mint)
-                            .lineLimit(1)
-                    }
+            // 워치: 학습(배운 단어) 행과 동일 — 글자+발음, 가운데 가나 예시단어/뜻. 예문 없음.
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text(entry.item.front)
+                    .font(.headline)
+                if let pronunciation = watchPronunciation {
+                    Text(pronunciation)
+                        .font(.caption2)
+                        .foregroundStyle(Theme.mint)
+                        .lineLimit(1)
                 }
-                Text(entry.item.meaning)
-                    .font(.caption2)
-                    .foregroundStyle(Theme.slate400)
-                    .lineLimit(1)
             }
             if let kanaWord {
                 VStack(alignment: .center, spacing: 1) {
@@ -407,7 +409,12 @@ private struct ArchiveRow: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
             } else {
-                Spacer(minLength: 0)
+                Text(entry.item.meaning)
+                    .font(.body)
+                    .foregroundStyle(Theme.slate300)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
             #endif
 
@@ -445,6 +452,13 @@ private struct ArchiveRow: View {
         guard entry.item.id.hasPrefix("kana:"),
               let word = KanaWordBank.words(forCharacter: entry.item.front).first else { return nil }
         return (word.word, word.meaning)
+    }
+
+    /// 글자 옆 발음: 단어는 읽기, 가나는 로마자. (워치 전용)
+    private var watchPronunciation: String? {
+        if let reading = entry.item.reading { return reading }
+        if entry.item.id.hasPrefix("kana:") { return entry.item.meaning }
+        return nil
     }
     #endif
 
