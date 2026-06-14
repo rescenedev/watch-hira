@@ -344,7 +344,8 @@ private struct ArchiveRow: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
-            // 글자 + 그 아래 초록 보조 표기
+            #if os(iOS)
+            // iOS: 글자 + 초록 보조 / 예문 가운데
             VStack(alignment: .leading, spacing: 1) {
                 Text(entry.item.front)
                     .font(.headline)
@@ -355,12 +356,8 @@ private struct ArchiveRow: View {
                         .lineLimit(1)
                 }
             }
-            #if os(iOS)
             .frame(width: 72, alignment: .leading)
-            #endif
 
-            #if os(iOS)
-            // iOS만 예문을 가운데 칸에. 워치는 절대 예문을 보여주지 않는다.
             if let sentence = exampleSentence {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(sentence.japanese)
@@ -379,12 +376,39 @@ private struct ArchiveRow: View {
                 Spacer(minLength: 0)
             }
             #else
-            // 워치: 뜻만(예문 없음).
-            Text(entry.item.meaning)
-                .font(.caption2)
-                .foregroundStyle(Theme.slate400)
-                .lineLimit(1)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            // 워치: 학습(배운 단어) 행과 동일 — 글자+읽기/뜻, 가운데 가나 예시단어. 예문 없음.
+            VStack(alignment: .leading, spacing: 1) {
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text(entry.item.front)
+                        .font(.headline)
+                    if let reading = entry.item.reading {
+                        Text(reading)
+                            .font(.caption2)
+                            .foregroundStyle(Theme.mint)
+                            .lineLimit(1)
+                    }
+                }
+                Text(entry.item.meaning)
+                    .font(.caption2)
+                    .foregroundStyle(Theme.slate400)
+                    .lineLimit(1)
+            }
+            if let kanaWord {
+                VStack(alignment: .center, spacing: 1) {
+                    Text(kanaWord.word)
+                        .font(.body)
+                        .foregroundStyle(Theme.slate300)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    Text(kanaWord.meaning)
+                        .font(.caption2)
+                        .foregroundStyle(Theme.slate400)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+            } else {
+                Spacer(minLength: 0)
+            }
             #endif
 
             // 배지 (완료 / D-N)
@@ -400,7 +424,8 @@ private struct ArchiveRow: View {
         .padding(.vertical, 2)
     }
 
-    /// 글자 옆 초록 보조: 단어는 읽기, 가나는 예시 단어(저장된 것 우선).
+    #if os(iOS)
+    /// 글자 옆 초록 보조: 단어는 읽기, 가나는 예시 단어(저장된 것 우선). (iOS 전용)
     private var secondaryText: String? {
         if let reading = entry.item.reading { return reading }
         if let example = entry.item.example, let word = example.word { return word }
@@ -409,6 +434,19 @@ private struct ArchiveRow: View {
         }
         return nil
     }
+    #endif
+
+    #if os(watchOS)
+    /// 가나의 예시 단어(저장된 것 우선). (워치 전용)
+    private var kanaWord: (word: String, meaning: String)? {
+        if let example = entry.item.example, let word = example.word {
+            return (word, example.wordMeaning ?? "")
+        }
+        guard entry.item.id.hasPrefix("kana:"),
+              let word = KanaWordBank.words(forCharacter: entry.item.front).first else { return nil }
+        return (word.word, word.meaning)
+    }
+    #endif
 
     #if os(iOS)
     /// 저장된 예문 우선, 없으면(옛 기록) 다시 계산. (iOS 전용)
