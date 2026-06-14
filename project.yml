@@ -18,6 +18,10 @@ schemes:
     test:
       targets:
         - KanaStudyUITests
+  KanaStudyiOS:
+    build:
+      targets:
+        KanaStudyiOS: all
 targets:
   KanaStudy:
     type: application

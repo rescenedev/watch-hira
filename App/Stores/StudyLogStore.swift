@@ -22,8 +22,26 @@ final class StudyLogStore: ObservableObject {
     var streak: Int { log.streak(asOf: Date()) }
     var todayCount: Int { log.cardCount(on: Date()) }
 
+    /// 오늘 본 항목들(최근 본 것이 앞).
+    var todayItems: [StudiedItem] { log.studiedItems(on: Date()) }
+
+    /// 항목이 있는 날들을 최신순으로 묶은 학습 기록.
+    var history: [(day: Date, items: [StudiedItem])] { log.studiedHistory() }
+
+    /// 지금까지 본 서로 다른 단어의 총수.
+    var totalLearnedCount: Int { log.totalStudiedCount() }
+
+    /// 특정 날짜에 본 항목들.
+    func studiedItems(on date: Date) -> [StudiedItem] { log.studiedItems(on: date) }
+
     func record(count: Int = 1) {
         log.record(date: Date(), count: count)
+        save()
+    }
+
+    /// 오늘 본 항목을 기록한다.
+    func record(item: StudiedItem) {
+        log.record(item: item, date: Date())
         save()
     }
 

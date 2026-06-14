@@ -120,10 +120,24 @@ struct VocabCardView: View {
             .cardTapNavigation(width: geometry.size.width, onAdvance: onAdvance, onRetreat: onRetreat)
         }
         .onAppear {
+            StudyLogStore.shared.record(item: studiedItem)
             if autoSpeak {
                 SpeechService.shared.speakJapanese(word.reading)
             }
         }
+    }
+
+    /// 학습 기록용 항목. 덱을 알면 덱별 id를, 아니면(커스텀 덱) 단어 기반 id를 쓴다.
+    private var studiedItem: StudiedItem {
+        if let deckKind {
+            return word.studiedItem(deck: deckKind)
+        }
+        return StudiedItem(
+            id: "vocab:\(word.word)",
+            front: word.word,
+            reading: word.hasDistinctReading ? word.reading : nil,
+            meaning: word.meaning
+        )
     }
 
     @ViewBuilder

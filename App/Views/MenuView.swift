@@ -12,6 +12,27 @@ struct MenuView: View {
 
     var body: some View {
         List {
+            #if os(iOS)
+            StudyProgressHeader(
+                streak: studyLogStore.streak,
+                today: studyLogStore.todayItems.count,
+                total: studyLogStore.totalLearnedCount
+            )
+            .slateRowOnIOS()
+            .noSeparatorOnIOS()
+            #endif
+
+            NavigationLink {
+                StudyHistoryView()
+            } label: {
+                ScriptRow(
+                    title: "오늘 배운 단어",
+                    sample: todayItemsSample
+                )
+            }
+            .slateRowOnIOS()
+            .noSeparatorOnIOS()
+
             NavigationLink(value: KanaScript.hiragana) {
                 ScriptRow(title: "히라가나", sample: "あいう")
             }
@@ -92,17 +113,6 @@ struct MenuView: View {
                 .slateRowOnIOS()
                 .noSeparatorOnIOS()
             #endif
-
-            HStack(spacing: 6) {
-                Image(systemName: "flame.fill")
-                    .foregroundStyle(studyLogStore.streak > 0 ? .orange : Theme.slate400)
-                Text(streakMessage)
-                    .font(.caption)
-                    .foregroundStyle(Theme.slate400)
-                Spacer()
-            }
-            .slateRowOnIOS()
-            .noSeparatorOnIOS()
         }
         .spacedListOnIOS()
         .slateScreenOnIOS()
@@ -115,13 +125,54 @@ struct MenuView: View {
         }
     }
 
-    private var streakMessage: String {
-        let streak = studyLogStore.streak
-        let today = studyLogStore.todayCount
-        if streak == 0 && today == 0 {
-            return "오늘 첫 카드를 넘겨보세요"
+    private var todayItemsSample: String {
+        let today = studyLogStore.todayItems.count
+        if today > 0 {
+            return "오늘 \(today)개 · 날짜별로 정리"
         }
-        return "연속 \(streak)일 · 오늘 \(today)장"
+        return studyLogStore.history.isEmpty
+            ? "아직 없어요 · 카드를 넘겨보세요"
+            : "날짜별로 정리"
+    }
+
+}
+
+/// 진도 요약: 연속 학습일·오늘 본 단어·누적 학습 단어를 한눈에.
+private struct StudyProgressHeader: View {
+    let streak: Int
+    let today: Int
+    let total: Int
+
+    var body: some View {
+        HStack(spacing: 0) {
+            stat(value: "\(streak)일", label: "연속", systemImage: "flame.fill", tint: streak > 0 ? .orange : Theme.slate400)
+            divider
+            stat(value: "\(today)개", label: "오늘", systemImage: "book.fill", tint: Theme.mint)
+            divider
+            stat(value: "\(total)개", label: "누적", systemImage: "checkmark.seal.fill", tint: Theme.slate300)
+        }
+        .padding(.vertical, 6)
+    }
+
+    private func stat(value: String, label: String, systemImage: String, tint: Color) -> some View {
+        VStack(spacing: 3) {
+            Image(systemName: systemImage)
+                .font(.subheadline)
+                .foregroundStyle(tint)
+            Text(value)
+                .font(.headline)
+                .monospacedDigit()
+            Text(label)
+                .font(.caption2)
+                .foregroundStyle(Theme.slate400)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var divider: some View {
+        Rectangle()
+            .fill(Theme.slate700.opacity(0.6))
+            .frame(width: 1, height: 28)
     }
 }
 

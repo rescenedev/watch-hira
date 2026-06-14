@@ -57,8 +57,7 @@ final class NotificationService: ObservableObject {
         let now = Date()
 
         for offset in 0..<7 {
-            guard let day = calendar.date(byAdding: .day, value: offset, to: now),
-                  let word = pool.randomElement() else { continue }
+            guard let day = calendar.date(byAdding: .day, value: offset, to: now) else { continue }
 
             var components = calendar.dateComponents([.year, .month, .day], from: day)
             components.hour = Self.reminderHour
@@ -66,11 +65,23 @@ final class NotificationService: ObservableObject {
             guard let fireDate = calendar.date(from: components), fireDate > now else { continue }
 
             let content = UNMutableNotificationContent()
-            content.title = "오늘의 단어"
-            content.body = word.hasDistinctReading
-                ? "\(word.word) (\(word.reading)) — \(word.meaning)"
-                : "\(word.word) — \(word.meaning)"
             content.sound = .default
+
+            // 발화일 '전날' 배운 단어가 있으면 복습으로, 없으면 새 단어 한 개.
+            let previousDay = calendar.date(byAdding: .day, value: -1, to: fireDate) ?? fireDate
+            let yesterdayItems = StudyLogStore.shared.studiedItems(on: previousDay)
+
+            if !yesterdayItems.isEmpty {
+                content.title = "어제 배운 단어 복습"
+                content.body = Self.reviewBody(for: yesterdayItems)
+            } else if let word = pool.randomElement() {
+                content.title = "오늘의 단어"
+                content.body = word.hasDistinctReading
+                    ? "\(word.word) (\(word.reading)) — \(word.meaning)"
+                    : "\(word.word) — \(word.meaning)"
+            } else {
+                continue
+            }
 
             let trigger = UNCalendarNotificationTrigger(
                 dateMatching: calendar.dateComponents([.year, .month, .day, .hour], from: fireDate),
@@ -83,6 +94,22 @@ final class NotificationService: ObservableObject {
             )
             try? await center.add(request)
         }
+    }
+
+    /// 어제 배운 단어 알림 본문: 앞쪽 몇 개를 "단어(읽기)"로 나열하고 나머지는 개수로.
+    private static func reviewBody(for items: [StudiedItem]) -> String {
+        let maxShown = 5
+        let shown = items.prefix(maxShown).map { item -> String in
+            if let reading = item.reading {
+                return "\(item.front)(\(reading))"
+            }
+            return item.front
+        }
+        var body = shown.joined(separator: ", ")
+        if items.count > maxShown {
+            body += " 외 \(items.count - maxShown)개"
+        }
+        return body
     }
 }
 #endif

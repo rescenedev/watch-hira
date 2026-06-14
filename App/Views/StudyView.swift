@@ -114,6 +114,7 @@ struct KanaCardView: View {
         }
         .onAppear {
             pickWords()
+            StudyLogStore.shared.record(item: kana.studiedItem)
             if autoSpeak {
                 SpeechService.shared.speakJapanese(kana.character)
             }

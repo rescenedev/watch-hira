@@ -36,8 +36,24 @@ final class SpeechService {
             synthesizer.stopSpeaking(at: .immediate)
         }
         let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(language: "ja-JP")
+        utterance.voice = AVSpeechSynthesisVoice(language: Self.voiceLanguage(for: text))
         utterance.rate = 0.42
         synthesizer.speak(utterance)
+    }
+
+    /// 텍스트에 일본어(가나·한자)가 있으면 일본어 음성, 아니면(라틴 알파벳 등) 영어 음성으로 읽는다.
+    /// ja-JP 음성은 영어 단어를 발음하지 못하므로 커스텀 덱 등 영어 항목은 en-US로 읽어야 한다.
+    private static func voiceLanguage(for text: String) -> String {
+        for scalar in text.unicodeScalars {
+            let value = scalar.value
+            let isJapanese =
+                (0x3040...0x30FF).contains(value) ||   // 히라가나 + 가타카나
+                (0x4E00...0x9FFF).contains(value) ||   // 한자(CJK 통합)
+                (0xFF66...0xFF9D).contains(value)      // 반각 가타카나
+            if isJapanese {
+                return "ja-JP"
+            }
+        }
+        return "en-US"
     }
 }
