@@ -107,19 +107,19 @@ struct StudyHistoryView: View {
             Button {
                 showArchive = true
             } label: {
-                HStack(spacing: 5) {
+                HStack(spacing: 7) {
                     Image(systemName: "archivebox.fill")
                     Text("보관함 \(archivedEntries.count)")
                 }
-                .font(.caption)
+                .font(.body.weight(.medium))
                 .foregroundStyle(Theme.slate300)
-                .padding(.horizontal, 13)
-                .padding(.vertical, 8)
-                .background(Theme.rowGradient, in: RoundedRectangle(cornerRadius: 11))
+                .padding(.horizontal, 26)
+                .padding(.vertical, 15)
+                .background(Theme.rowGradient, in: RoundedRectangle(cornerRadius: 16))
             }
             .buttonStyle(.plain)
             .frame(maxWidth: .infinity)
-            .padding(.bottom, 6)
+            .padding(.bottom, 8)
         }
     }
     #endif
@@ -344,7 +344,7 @@ private struct ArchiveRow: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
-            // 글자 + 그 아래 초록 보조 표기 (배운 단어 행과 동일)
+            // 글자 + 그 아래 초록 보조 표기
             VStack(alignment: .leading, spacing: 1) {
                 Text(entry.item.front)
                     .font(.headline)
@@ -355,9 +355,12 @@ private struct ArchiveRow: View {
                         .lineLimit(1)
                 }
             }
+            #if os(iOS)
             .frame(width: 72, alignment: .leading)
+            #endif
 
-            // 예문 (가운데 칸)
+            #if os(iOS)
+            // iOS만 예문을 가운데 칸에. 워치는 절대 예문을 보여주지 않는다.
             if let sentence = exampleSentence {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(sentence.japanese)
@@ -375,6 +378,14 @@ private struct ArchiveRow: View {
             } else {
                 Spacer(minLength: 0)
             }
+            #else
+            // 워치: 뜻만(예문 없음).
+            Text(entry.item.meaning)
+                .font(.caption2)
+                .foregroundStyle(Theme.slate400)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            #endif
 
             // 배지 (완료 / D-N)
             if !entry.badge.isEmpty {
@@ -399,7 +410,8 @@ private struct ArchiveRow: View {
         return nil
     }
 
-    /// 저장된 예문 우선, 없으면(옛 기록) 다시 계산.
+    #if os(iOS)
+    /// 저장된 예문 우선, 없으면(옛 기록) 다시 계산. (iOS 전용)
     private var exampleSentence: (japanese: String, korean: String?)? {
         let item = entry.item
         if let example = item.example {
@@ -412,6 +424,7 @@ private struct ArchiveRow: View {
         let sentence = ExampleSentenceBank.sentence(forWord: item.front)
         return (sentence.japanese, sentence.korean)
     }
+    #endif
 }
 
 #Preview {
