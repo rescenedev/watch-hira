@@ -1,15 +1,30 @@
 import SwiftUI
 import KanaCore
+#if os(iOS)
+import UserNotifications
+#endif
 
 @main
 struct KanaStudyApp: App {
     private let launchRoute = LaunchRoute.parse()
+    @ObservedObject private var router = AppRouter.shared
 
     var body: some Scene {
         WindowGroup {
-            NavigationStack {
+            NavigationStack(path: $router.path) {
                 rootView
+                    .navigationDestination(for: AppRouter.Route.self) { route in
+                        switch route {
+                        case .studyHistory: StudyHistoryView()
+                        }
+                    }
             }
+            #if os(iOS)
+            .task {
+                UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
+                await NotificationService.shared.refreshIfEnabled()
+            }
+            #endif
         }
     }
 

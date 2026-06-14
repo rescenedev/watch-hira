@@ -4,19 +4,38 @@ import KanaCore
 /// 배운 단어를 날짜별로 정리해 보여준다. 오늘이 맨 위, 그 아래로 지난 날들.
 struct StudyHistoryView: View {
     @ObservedObject private var store = StudyLogStore.shared
+    @ObservedObject private var reviewSchedule = ReviewScheduleStore.shared
+    @State private var toast: String?
+
+    /// 스누즈로 미뤄둔(아직 안 떠야 하는) 단어를 뺀 복습 목록.
+    private var history: [(day: Date, items: [StudiedItem])] {
+        store.history.compactMap { day, items in
+            let visible = items.filter { reviewSchedule.isDue($0.id) }
+            return visible.isEmpty ? nil : (day, visible)
+        }
+    }
 
     var body: some View {
         Group {
-            if store.history.isEmpty {
+            if history.isEmpty {
                 emptyState
             } else {
                 List {
-                    ForEach(store.history, id: \.day) { day, items in
+                    ForEach(history, id: \.day) { day, items in
                         Section {
                             ForEach(items) { item in
                                 StudyHistoryRow(item: item)
                                     .slateRow()
                                     .noSeparatorOnIOS()
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                        Button {
+                                            withAnimation { toast = reviewSchedule.snooze(item.id) }
+                                            dismissToastSoon()
+                                        } label: {
+                                            Label("외웠어요", systemImage: "checkmark.circle.fill")
+                                        }
+                                        .tint(Theme.mint)
+                                    }
                             }
                         } header: {
                             Text(Self.sectionTitle(for: day, count: items.count))
@@ -29,10 +48,32 @@ struct StudyHistoryView: View {
         }
         .slateScreen()
         .navigationTitle("배운 단어")
+        .overlay(alignment: .bottom) { toastView }
+    }
+
+    @ViewBuilder
+    private var toastView: some View {
+        if let toast {
+            Text(toast)
+                .font(.caption)
+                .foregroundStyle(Theme.slate300)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Theme.slate800, in: Capsule())
+                .padding(.bottom, 24)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+    }
+
+    private func dismissToastSoon() {
+        Task {
+            try? await Task.sleep(nanoseconds: 2_200_000_000)
+            withAnimation { toast = nil }
+        }
     }
 
     private var emptyState: some View {
-        Text("카드를 넘기면\n날짜별로 모아서 보여드려요")
+        Text("복습할 단어가 없어요\n카드를 넘기면 여기에 모여요")
             .font(.footnote)
             .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)
